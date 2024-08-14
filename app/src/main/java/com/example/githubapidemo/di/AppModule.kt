@@ -17,6 +17,7 @@ package com.example.githubapidemo.di
 
 import android.content.Context
 import com.example.githubapidemo.network.ApiInterface
+import com.example.githubapidemo.repository.GithubUserRepository
 import com.example.githubapidemo.utils.Constants
 import com.example.githubapidemo.utils.dispachperProvider.DispatcherProvider
 import com.example.githubapidemo.utils.dispachperProvider.DispatcherProviderImpl
@@ -73,10 +74,10 @@ class AppModule {
         return okHttpClient.build()
     }
 
-  /*  @Provides
+    @Provides
     @Singleton
     fun providesRepository(apiInterface: ApiInterface): GithubUserRepository =
-        GithubUserRepository(apiInterface)*/
+        GithubUserRepository(apiInterface)
 
     @Provides
     @Singleton
