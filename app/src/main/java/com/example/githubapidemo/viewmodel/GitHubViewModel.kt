@@ -17,9 +17,9 @@ package com.example.githubapidemo.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.githubapidemo.model.GitHubUserItem
+import com.example.githubapidemo.domain.GetGitHubUsersUseCase
+import com.example.githubapidemo.domain.GitHubUser
 import com.example.githubapidemo.model.UIState
-import com.example.githubapidemo.repository.GithubUserRepository
 import com.example.githubapidemo.utils.dispachperProvider.DispatcherProvider
 import com.example.githubapidemo.utils.networkhelper.NetworkHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -32,12 +32,12 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class GitHubViewModel @Inject constructor(
     private val dispatcher: DispatcherProvider,
-    private val repository: GithubUserRepository,
+    private val getGitHubUsersUseCase: GetGitHubUsersUseCase,
     private val networkHelper: NetworkHelper
 ) : ViewModel() {
 
-    private val _gitUsersData = MutableStateFlow<UIState<List<GitHubUserItem>>>(UIState.Empty)
-    val gitUsersData: StateFlow<UIState<List<GitHubUserItem>>> = _gitUsersData.asStateFlow()
+    private val _gitUsersData = MutableStateFlow<UIState<List<GitHubUser>>>(UIState.Empty)
+    val gitUsersData: StateFlow<UIState<List<GitHubUser>>> = _gitUsersData.asStateFlow()
 
     fun fetchGitHubUsersData() {
         viewModelScope.launch(dispatcher.io) {
@@ -48,7 +48,7 @@ class GitHubViewModel @Inject constructor(
                     return@launch
                 }
 
-                val data = repository.getGitUsers()
+                val data = getGitHubUsersUseCase()
                 if (data.isNotEmpty()) {
                     _gitUsersData.emit(UIState.Success(data))
                 } else {

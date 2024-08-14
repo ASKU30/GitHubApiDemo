@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.githubapidemo.model
+package com.example.githubapidemo.data
 
+import com.example.githubapidemo.domain.GitHubUser
 import com.squareup.moshi.Json
 
 data class GitHubUserItem(
@@ -36,4 +37,27 @@ data class GitHubUserItem(
     @Json(name = "subscriptions_url") val subscriptionsUrl: String,
     @Json(name = "type") val type: String,
     @Json(name = "url") val url: String
-)
+) {
+    fun toDomainModel(): GitHubUser {
+        return GitHubUser(
+            avatarUrl = this.avatarUrl,
+            eventsUrl = this.eventsUrl,
+            followersUrl = this.followersUrl,
+            followingUrl = this.followingUrl,
+            gistsUrl = this.gistsUrl,
+            gravatarId = this.gravatarId,
+            htmlUrl = this.htmlUrl,
+            id = this.id,
+            login = this.login,
+            nodeId = this.nodeId,
+            organizationsUrl = this.organizationsUrl,
+            receivedEventsUrl = this.receivedEventsUrl,
+            reposUrl = this.reposUrl,
+            siteAdmin = this.siteAdmin,
+            starredUrl = this.starredUrl,
+            subscriptionsUrl = this.subscriptionsUrl,
+            type = this.type,
+            url = this.url
+        )
+    }
+}

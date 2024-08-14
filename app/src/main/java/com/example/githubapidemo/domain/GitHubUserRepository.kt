@@ -13,14 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.githubapidemo.network
+package com.example.githubapidemo.domain
 
-import com.example.githubapidemo.data.GitHubUserItem
-import javax.inject.Singleton
-import retrofit2.http.GET
-
-@Singleton
-interface ApiInterface {
-    @GET("users")
-    suspend fun getUserDetails(): List<GitHubUserItem>
+interface GitHubUserRepository {
+    suspend fun getGitUsers(): List<GitHubUser>
 }

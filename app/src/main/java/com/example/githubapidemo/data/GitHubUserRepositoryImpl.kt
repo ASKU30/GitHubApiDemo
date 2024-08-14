@@ -13,14 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.githubapidemo.network
+package com.example.githubapidemo.data
 
-import com.example.githubapidemo.data.GitHubUserItem
-import javax.inject.Singleton
-import retrofit2.http.GET
+import com.example.githubapidemo.domain.GitHubUser
+import com.example.githubapidemo.domain.GitHubUserRepository
+import com.example.githubapidemo.network.ApiInterface
+import javax.inject.Inject
 
-@Singleton
-interface ApiInterface {
-    @GET("users")
-    suspend fun getUserDetails(): List<GitHubUserItem>
+class GitHubUserRepositoryImpl @Inject constructor(
+    private val apiInterface: ApiInterface
+) : GitHubUserRepository {
+
+    override suspend fun getGitUsers(): List<GitHubUser> {
+        return apiInterface.getUserDetails().map { it.toDomainModel() }
+    }
 }

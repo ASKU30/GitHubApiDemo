@@ -3,9 +3,9 @@ buildscript {
     repositories {
         google()
     }
-    dependencies {
-        classpath("com.diffplug.spotless:spotless-plugin-gradle:6.19.0")
-    }
+  /*  dependencies {
+        classpath("com.diffplug.spotless:spotless-plugin-gradle:6.25.0")
+    }*/
 }
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 plugins {

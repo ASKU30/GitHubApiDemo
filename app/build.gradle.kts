@@ -99,6 +99,8 @@ dependencies {
     kapt(libs.hilt.compiler)
 
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.4")
+
     // Hilt
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)

@@ -16,8 +16,10 @@
 package com.example.githubapidemo.di
 
 import android.content.Context
+import com.example.githubapidemo.data.GitHubUserRepositoryImpl
+import com.example.githubapidemo.domain.GetGitHubUsersUseCase
+import com.example.githubapidemo.domain.GitHubUserRepository
 import com.example.githubapidemo.network.ApiInterface
-import com.example.githubapidemo.repository.GithubUserRepository
 import com.example.githubapidemo.utils.Constants
 import com.example.githubapidemo.utils.dispachperProvider.DispatcherProvider
 import com.example.githubapidemo.utils.dispachperProvider.DispatcherProviderImpl
@@ -76,8 +78,15 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun providesRepository(apiInterface: ApiInterface): GithubUserRepository =
-        GithubUserRepository(apiInterface)
+    fun provideGitHubUserRepository(apiInterface: ApiInterface): GitHubUserRepository {
+        return GitHubUserRepositoryImpl(apiInterface)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGetGitHubUsersUseCase(repository: GitHubUserRepository): GetGitHubUsersUseCase {
+        return GetGitHubUsersUseCase(repository)
+    }
 
     @Provides
     @Singleton

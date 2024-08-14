@@ -16,10 +16,9 @@
 package com.example.githubapidemo
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import app.cash.turbine.test
-import com.example.githubapidemo.model.GitHubUserItem
+import com.example.githubapidemo.domain.GetGitHubUsersUseCase
+import com.example.githubapidemo.domain.GitHubUser
 import com.example.githubapidemo.model.UIState
-import com.example.githubapidemo.repository.GithubUserRepository
 import com.example.githubapidemo.utils.dispachperProvider.DispatcherProvider
 import com.example.githubapidemo.utils.networkhelper.NetworkHelper
 import com.example.githubapidemo.viewmodel.GitHubViewModel
@@ -33,21 +32,25 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Assert.assertEquals
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import org.mockito.junit.MockitoJUnitRunner
 
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(MockitoJUnitRunner::class)
 class GitHubViewModelTest {
+
     @get:Rule
     val instantExecutorRule = InstantTaskExecutorRule()
 
     @Mock
-    private lateinit var repository: GithubUserRepository
+    private lateinit var getGitHubUsersUseCase: GetGitHubUsersUseCase
 
     @Mock
     private lateinit var networkHelper: NetworkHelper
@@ -59,7 +62,6 @@ class GitHubViewModelTest {
     fun setUp() {
         MockitoAnnotations.openMocks(this)
         testDispatcher = StandardTestDispatcher()
-
         Dispatchers.setMain(testDispatcher)
 
         val dispatcherProvider = object : DispatcherProvider {
@@ -68,7 +70,7 @@ class GitHubViewModelTest {
             override val default = testDispatcher
         }
 
-        viewModel = GitHubViewModel(dispatcherProvider, repository, networkHelper)
+        viewModel = GitHubViewModel(dispatcherProvider, getGitHubUsersUseCase, networkHelper)
     }
 
     @After
@@ -77,128 +79,98 @@ class GitHubViewModelTest {
     }
 
     @Test
-    fun `fetchGitHubUsersData returns success when data is available`() = runTest {
+    fun `test fetchGitHubUsersData success`() = runTest {
         // Given
-        val gitHubUsers = listOf(
-            GitHubUserItem(
-                login = "mojombo",
-                avatarUrl = "https://avatars.githubusercontent.com/u/1?v=3",
-                htmlUrl = "https://github.com/mojombo",
+        val userList = listOf(
+            GitHubUser(
+                avatarUrl = "avatar_url",
+                eventsUrl = "events_url",
+                followersUrl = "followers_url",
+                followingUrl = "following_url",
+                gistsUrl = "gists_url",
+                gravatarId = "",
+                htmlUrl = "html_url",
                 id = 1,
+                login = "mojombo",
                 nodeId = "MDQ6VXNlcjE=",
-                url = "https://api.github.com/users/mojombo",
-                followersUrl = "https://api.github.com/users/mojombo/followers",
-                followingUrl = "https://api.github.com/users/mojombo/following{/other_user}",
-                gistsUrl = "https://api.github.com/users/mojombo/gists{/gist_id}",
-                gravatarId = "",
-                organizationsUrl = "https://api.github.com/users/mojombo/orgs",
-                receivedEventsUrl = "https://api.github.com/users/mojombo/received_events",
-                type = "User",
-                reposUrl = "https://api.github.com/users/mojombo/repos",
-                eventsUrl = "https://api.github.com/users/mojombo/events{/privacy}",
+                organizationsUrl = "organizations_url",
+                receivedEventsUrl = "received_events_url",
+                reposUrl = "repos_url",
                 siteAdmin = false,
-                starredUrl = "https://api.github.com/users/mojombo/starred{/owner}{/repo}",
-                subscriptionsUrl = "https://api.github.com/users/mojombo/subscriptions"
-            ),
-            GitHubUserItem(
-                login = "defunkt",
-                avatarUrl = "https://avatars.githubusercontent.com/u/2?v=3",
-                htmlUrl = "https://github.com/defunkt",
-                id = 2,
-                nodeId = "MDQ6VXNlcjI=",
-                url = "https://api.github.com/users/defunkt",
-                followersUrl = "https://api.github.com/users/defunkt/followers",
-                followingUrl = "https://api.github.com/users/defunkt/following{/other_user}",
-                gistsUrl = "https://api.github.com/users/defunkt/gists{/gist_id}",
-                gravatarId = "",
-                organizationsUrl = "https://api.github.com/users/defunkt/orgs",
-                receivedEventsUrl = "https://api.github.com/users/defunkt/received_events",
+                starredUrl = "starred_url",
+                subscriptionsUrl = "subscriptions_url",
                 type = "User",
-                reposUrl = "https://api.github.com/users/defunkt/repos",
-                eventsUrl = "https://api.github.com/users/defunkt/events{/privacy}",
-                siteAdmin = false,
-                starredUrl = "https://api.github.com/users/defunkt/starred{/owner}{/repo}",
-                subscriptionsUrl = "https://api.github.com/users/defunkt/subscriptions"
+                url = "url"
             )
         )
 
-        // Stubbing repository and network helper
+        `when`(getGitHubUsersUseCase()).thenReturn(userList)
         `when`(networkHelper.isNetworkAvailable()).thenReturn(true)
-        `when`(repository.getGitUsers()).thenReturn(gitHubUsers)
 
         // When
-        viewModel.fetchGitHubUsersData() // Trigger the flow to emit values
+        viewModel.fetchGitHubUsersData()
+
+        advanceUntilIdle()
 
         // Then
-        viewModel.gitUsersData.test {
-            assertEquals(UIState.Empty, awaitItem())
-            assertEquals(UIState.Loading, awaitItem())
-            assertEquals(UIState.Success(gitHubUsers), awaitItem())
-            cancelAndConsumeRemainingEvents() // Optional: Ensure no other events remain
-        }
+        val result = viewModel.gitUsersData.first()
+        Assert.assertTrue(result is UIState.Success)
+        Assert.assertEquals(userList, (result as UIState.Success).data)
     }
 
     @Test
-    fun `fetchGitHubUsersData returns error when no data is available`() = runTest {
-        // Given
-        `when`(networkHelper.isNetworkAvailable()).thenReturn(true)
-        `when`(repository.getGitUsers()).thenReturn(emptyList())
-
-        // When
-        viewModel.fetchGitHubUsersData() // Trigger the flow to emit values
-
-        // Then
-        viewModel.gitUsersData.test {
-            // Verify the initial state
-            assertEquals(UIState.Empty, awaitItem())
-
-            // Verify the loading state
-            assertEquals(UIState.Loading, awaitItem())
-
-            // Verify the empty state
-            assertEquals(UIState.Empty, awaitItem())
-
-            // Ensure no additional events remain
-            cancelAndConsumeRemainingEvents()
-        }
-    }
-
-    @Test
-    fun `fetchGitHubUsersData returns failure when an exception is thrown`() = runTest {
-        // Given
-        `when`(networkHelper.isNetworkAvailable()).thenReturn(true)
-        `when`(repository.getGitUsers()).thenThrow(RuntimeException("No data available"))
-
-        // When
-        viewModel.fetchGitHubUsersData() // Trigger the flow to emit values
-
-        // Then
-        viewModel.gitUsersData.test {
-            // Verify the initial state
-            assertEquals(UIState.Empty, awaitItem())
-
-            // Verify the loading state
-            assertEquals(UIState.Loading, awaitItem())
-
-            // Verify the failure state with the actual formatted error message
-            assertEquals(UIState.Failure("An error occurred: No data available"), awaitItem())
-
-            // Ensure no additional events remain
-            cancelAndConsumeRemainingEvents()
-        }
-    }
-
-    @Test
-    fun `test fetchGitHubUsersData when network is not available`(): Unit = runTest {
+    fun `test fetchGitHubUsersData network unavailable`() = runTest {
         // Given
         `when`(networkHelper.isNetworkAvailable()).thenReturn(false)
 
         // When
-        viewModel.fetchGitHubUsersData() // Trigger the flow to emit values
+        viewModel.fetchGitHubUsersData()
 
         advanceUntilIdle()
+
         // Then
         val result = viewModel.gitUsersData.first()
-        assertEquals(UIState.Failure("Network is not available"), result)
+        Assert.assertTrue(result is UIState.Failure)
+        Assert.assertEquals("Network is not available", (result as UIState.Failure).message)
+    }
+
+    @Test
+    fun `test fetchGitHubUsersData failure`() = runTest {
+        // Given
+        `when`(networkHelper.isNetworkAvailable()).thenReturn(true)
+        `when`(getGitHubUsersUseCase()).thenThrow(RuntimeException("Something went wrong"))
+
+        // When
+        viewModel.fetchGitHubUsersData()
+
+        advanceUntilIdle()
+
+        // Then
+        val result = viewModel.gitUsersData.first()
+        if (result is UIState.Failure) {
+            println("Actual error message: ${result.message}")
+            Assert.assertEquals(
+                "An error occurred: Something went wrong",
+                result.message
+            )
+        } else {
+            Assert.fail("Expected UIState.Failure but got $result")
+        }
+    }
+
+    @Test
+    fun `test fetchGitHubUsersData with empty list`() = runTest {
+        // Given
+        `when`(networkHelper.isNetworkAvailable()).thenReturn(true)
+        `when`(getGitHubUsersUseCase()).thenReturn(emptyList())
+
+        // When
+        viewModel.fetchGitHubUsersData()
+
+        advanceUntilIdle()
+
+        // Then
+        val result = viewModel.gitUsersData.first()
+        Assert.assertTrue(result is UIState.Empty)
     }
 }

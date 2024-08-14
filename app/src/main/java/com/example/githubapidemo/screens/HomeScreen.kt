@@ -59,7 +59,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
-import com.example.githubapidemo.model.GitHubUserItem
+import com.example.githubapidemo.domain.GitHubUser
 import com.example.githubapidemo.model.UIState
 import com.example.githubapidemo.navigation.NavigationItem
 import com.example.githubapidemo.viewmodel.GitHubViewModel
@@ -70,7 +70,8 @@ fun HomeScreen(navController: NavHostController) {
     val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     Box(
         modifier = Modifier
-            .fillMaxSize().background(Color.Yellow)
+            .fillMaxSize()
+            .background(Color.Yellow)
             .systemBarsPadding()
     ) {
         Scaffold(
@@ -110,14 +111,14 @@ fun HomeScreen(navController: NavHostController) {
 
 @Composable
 fun ShowData(viewModel: GitHubViewModel = hiltViewModel(), navController: NavHostController) {
-    val uiStateNews: UIState<List<GitHubUserItem>> by
+    val uiStateNews: UIState<List<GitHubUser>> by
     viewModel.gitUsersData.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
         viewModel.fetchGitHubUsersData()
     }
     when (uiStateNews) {
         is UIState.Success -> {
-            val gitHubUserItemList = (uiStateNews as UIState.Success<List<GitHubUserItem>>).data
+            val gitHubUserItemList = (uiStateNews as UIState.Success<List<GitHubUser>>).data
             LazyColumn {
                 items(gitHubUserItemList) { gitHubUserItem ->
                     GitUsersRow(gitHubUserItem) {
@@ -162,7 +163,7 @@ fun DisplayUIState(message: String, isLoading: Boolean = false) {
 }
 
 @Composable
-fun GitUsersRow(gitUser: GitHubUserItem, onItemClick: (GitHubUserItem) -> Unit) {
+fun GitUsersRow(gitUser: GitHubUser, onItemClick: (GitHubUser) -> Unit) {
     Card(
         modifier = Modifier.run {
             fillMaxWidth()

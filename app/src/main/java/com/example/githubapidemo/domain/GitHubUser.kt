@@ -13,18 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.githubapidemo.repository
+package com.example.githubapidemo.domain
 
-import com.example.githubapidemo.model.GitHubUserItem
-import com.example.githubapidemo.network.ApiInterface
-import javax.inject.Inject
-import javax.inject.Singleton
-
-@Singleton
-class GithubUserRepository @Inject constructor(
-    private val apiInterface: ApiInterface
-) {
-    suspend fun getGitUsers(): List<GitHubUserItem> {
-        return apiInterface.getUserDetails()
-    }
-}
+data class GitHubUser(
+    val avatarUrl: String,
+    val eventsUrl: String,
+    val followersUrl: String,
+    val followingUrl: String,
+    val gistsUrl: String,
+    val gravatarId: String,
+    val htmlUrl: String,
+    val id: Int,
+    val login: String,
+    val nodeId: String,
+    val organizationsUrl: String,
+    val receivedEventsUrl: String,
+    val reposUrl: String,
+    val siteAdmin: Boolean,
+    val starredUrl: String,
+    val subscriptionsUrl: String,
+    val type: String,
+    val url: String
+)
